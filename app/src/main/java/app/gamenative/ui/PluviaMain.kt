@@ -69,7 +69,6 @@ import app.gamenative.ui.screen.xserver.XServerScreen
 import app.gamenative.ui.theme.PluviaTheme
 import app.gamenative.utils.ContainerUtils
 import app.gamenative.utils.CustomGameScanner
-import app.gamenative.utils.GameFeedbackUtils
 import app.gamenative.utils.IntentLaunchManager
 import app.gamenative.utils.UpdateChecker
 import app.gamenative.utils.UpdateInfo
@@ -849,9 +848,8 @@ fun PluviaMain(
                         Timber.d("GameFeedback: Inside coroutine scope")
                         try {
                             Timber.d("GameFeedback: Calling submitGameFeedback with rating=${feedbackState.rating}")
-                            val result = GameFeedbackUtils.submitGameFeedback(
+                            val result = viewModel.submitGameFeedback(
                                 context = context,
-                                supabase = PluviaApp.supabase,
                                 appId = appId,
                                 rating = feedbackState.rating,
                                 tags = feedbackState.selectedTags.toList(),

@@ -23,12 +23,6 @@ import com.posthog.android.PostHogAndroid
 import com.posthog.android.PostHogAndroidConfig
 
 // Supabase imports
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.annotations.SupabaseInternal
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.network.supabaseApi
-import io.ktor.client.plugins.HttpTimeout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -95,15 +89,6 @@ class PluviaApp : SplitCompatApplication() {
         }
         PostHogAndroid.setup(this, postHogConfig)
 
-        // Initialize Supabase client
-        try {
-            initSupabase()
-            Timber.d("Supabase client initialized with URL: ${BuildConfig.SUPABASE_URL}")
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to initialize Supabase client: ${e.message}")
-            e.printStackTrace()
-        }
-
         // Initialize GOG service
         appScope.launch {
             try {
@@ -127,35 +112,5 @@ class PluviaApp : SplitCompatApplication() {
         var inputControlsManager: InputControlsManager? = null
         var touchpadView: TouchpadView? = null
 
-        // Supabase client for game feedback
-        lateinit var supabase: SupabaseClient
-            private set
-
-        // Initialize Supabase client
-        @OptIn(SupabaseInternal::class)
-        fun initSupabase() {
-            Timber.d("Initializing Supabase client with URL: ${BuildConfig.SUPABASE_URL}")
-            if (BuildConfig.SUPABASE_URL.isBlank() || BuildConfig.SUPABASE_KEY.isBlank()) {
-                Timber.e("Invalid Supabase URL or key - URL: ${BuildConfig.SUPABASE_URL}, key empty: ${BuildConfig.SUPABASE_KEY.isBlank()}")
-                throw IllegalStateException("Supabase URL or key is empty")
-            }
-
-            supabase = createSupabaseClient(
-                supabaseUrl = BuildConfig.SUPABASE_URL,
-                supabaseKey = BuildConfig.SUPABASE_KEY
-            ) {
-                Timber.d("Configuring Supabase client")
-                httpConfig {
-                    Timber.d("Setting up HTTP timeouts")
-                    install(HttpTimeout) {
-                        requestTimeoutMillis = 30_000   // overall call
-                        connectTimeoutMillis = 15_000   // TCP handshake / TLS
-                        socketTimeoutMillis  = 30_000   // idle socket
-                    }
-                }
-                install(Postgrest)
-                Timber.d("Postgrest plugin installed")
-            }
-        }
     }
 }
