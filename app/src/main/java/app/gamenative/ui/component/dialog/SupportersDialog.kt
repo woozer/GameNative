@@ -33,30 +33,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.gamenative.PluviaApp
 import app.gamenative.R
+import app.gamenative.ui.model.SupportersViewModel
 import app.gamenative.utils.KofiSupporter
-import app.gamenative.utils.fetchKofiSupporters
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SupportersDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
+    viewModel: SupportersViewModel = hiltViewModel(),
 ) {
     if (!visible) return
 
-    var supporters by remember { mutableStateOf<List<KofiSupporter>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val supporters by viewModel.supporters.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        isLoading = true
-        val data = withContext(Dispatchers.IO) {
-            fetchKofiSupporters(PluviaApp.supabase)
+    LaunchedEffect(visible) {
+        if (visible) {
+            viewModel.loadSupporters()
         }
-        supporters = data
-        isLoading = false
     }
 
     val members = remember(supporters) {

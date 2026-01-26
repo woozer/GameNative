@@ -41,10 +41,12 @@ import timber.log.Timber
 import kotlinx.coroutines.Job
 import app.gamenative.utils.ContainerUtils
 import kotlinx.coroutines.async
+import app.gamenative.repository.SupabaseRepository
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val appTheme: IAppTheme,
+    private val supabaseRepository: SupabaseRepository,
 ) : ViewModel() {
 
     sealed class MainUiEvent {
@@ -174,6 +176,22 @@ class MainViewModel @Inject constructor(
 
     fun setPalette(value: PaletteStyle) {
         appTheme.currentPalette = value
+    }
+
+    suspend fun submitGameFeedback(
+        context: Context,
+        appId: String,
+        rating: Int,
+        tags: List<String>,
+        notes: String?,
+    ): Boolean {
+        return supabaseRepository.submitGameFeedback(
+            context = context,
+            appId = appId,
+            rating = rating,
+            tags = tags,
+            notes = notes,
+        )
     }
 
     fun setAnnoyingDialogShown(value: Boolean) {
